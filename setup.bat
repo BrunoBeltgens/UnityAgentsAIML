@@ -1,39 +1,34 @@
 @echo off
-REM Check if Git is installed
 where git >nul 2>nul
 IF %ERRORLEVEL% NEQ 0 (
     echo Git is not installed. Please install Git.
+    pause
     exit /b 1
 )
 
-REM Create a virtual environment in the current directory
-echo Creating a virtual environment named "ml-agents-3.10-venv"...
-py -3.10 -m venv ml-agents-3.10-venv
+py -3.10 --version >nul 2>nul
+IF %ERRORLEVEL% NEQ 0 (
+    echo Python 3.10 is not installed. Please install Python 3.10 from https://www.python.org/downloads/release/python-31011/.
+    pause
+    exit /b 1
+)
 
-REM Activate the virtual environment
+echo Creating a virtual environment named ".venv"...
+py -3.10 -m venv .venv
+
 echo Activating the virtual environment...
-call ml-agents-3.10-venv\Scripts\activate.bat
+call .venv\Scripts\activate.bat
 
-REM Upgrade pip to the latest version
-echo Upgrading pip...
-pip install --upgrade pip
+echo Upgrading pip to the latest version...
+python.exe -m pip install --upgrade pip
 
-REM Install PyTorch (CUDA version)
-echo Installing PyTorch...
-pip install torch~=2.2.1 --index-url https://download.pytorch.org/whl/cu121
+echo Installing packages...
+pip install torch -f https://download.pytorch.org/whl/torch_stable.html
+pip install ./ml-agents-envs
+pip install ./ml-agents
 
-REM Install the ml-agents package
-echo Installing the ml-agents package...
-pip install ml-agents
-
-REM Install the ml-agents-envs package
-echo Installing the ml-agents-envs package...
-pip install ml-agents-envs
-
-REM Inform the user that the setup is complete
-echo Setup complete! The virtual environment "ml-agents-3.10-venv" has been created and activated.
-echo The ml-agents and ml-agents-envs packages have been installed from the specified branch.
-echo To activate the environment in the future, run: call ml-agents-3.10-venv\Scripts\activate.bat
-echo To deactivate the environment, simply run: deactivate
+echo Setup complete! The virtual environment ".venv" has been created and activated.
+echo To activate the environment in the future, run: .venv\Scripts\activate.bat
+echo To deactivate the environment, run: .venv\Scripts\deactivate.bat
 
 pause

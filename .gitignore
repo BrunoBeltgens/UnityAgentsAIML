@@ -1,4 +1,5 @@
-/ml-agents-3.10-venv
+# Virtual environment
+/.venv
 
 # Output Artifacts (Legacy)
 /models
