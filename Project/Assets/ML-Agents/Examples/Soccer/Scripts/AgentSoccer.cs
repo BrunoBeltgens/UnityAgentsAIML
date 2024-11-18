@@ -1,3 +1,4 @@
+using ML_Agents.Scripts;
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -38,6 +39,7 @@ public class AgentSoccer : Agent
     float m_Existential;
     float m_LateralSpeed;
     float m_ForwardSpeed;
+    bool shouldPlaySound;
 
 
     [HideInInspector]
@@ -51,6 +53,7 @@ public class AgentSoccer : Agent
 
     public override void Initialize()
     {
+        shouldPlaySound = false;
         SoccerEnvController envController = GetComponentInParent<SoccerEnvController>();
         if (envController != null)
         {
@@ -106,6 +109,10 @@ public class AgentSoccer : Agent
 
     public void MoveAgent(ActionSegment<int> act)
     {
+        if(shouldPlaySound){
+        SoundManager.PlaySound(new Sound(transform.position, 10f));
+        shouldPlaySound = false;
+        }
         var dirToGo = Vector3.zero;
         var rotateDir = Vector3.zero;
 
@@ -215,6 +222,7 @@ public class AgentSoccer : Agent
             var dir = c.contacts[0].point - transform.position;
             dir = dir.normalized;
             c.gameObject.GetComponent<Rigidbody>().AddForce(dir * force);
+            shouldPlaySound = true;
         }
     }
 
