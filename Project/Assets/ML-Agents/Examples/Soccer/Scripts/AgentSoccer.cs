@@ -32,7 +32,7 @@ public class AgentSoccer : Agent
     public Team team;
     float m_KickPower;
     float m_BallTouch;
-    public float hearingRadius = 5f;
+    public float hearingRadius = 10f;
     public Position position;
 
     //kick power (force) 2000 is default
@@ -50,22 +50,31 @@ public class AgentSoccer : Agent
     BehaviorParameters m_BehaviorParameters;
     public Vector3 initialPos;
     public float rotSign;
+    public float ballID;
 
     EnvironmentParameters m_ResetParams;
 
     public void Update()
     {
-        GameObject ball = GameObject.FindWithTag("ball");
+        SoundHeard(this);
+
+        GameObject ball = transform.parent.Find("Soccer Ball")?.gameObject;
         if (ball != null)
         {
-            float distanceToBall = Vector3.Distance(transform.position, ball.transform.position);
+            float distanceToBall = Vector3.Distance(this.transform.position, ball.transform.position);
             
             if (distanceToBall <= hearingRadius)
             {
               
                 shouldPlaySound = true;
             }
+            else{
+                shouldPlaySound = false;
+            }
         }
+
+        
+        
     }
 
     public override void Initialize()
@@ -122,37 +131,31 @@ public class AgentSoccer : Agent
 
     m_ResetParams = Academy.Instance.EnvironmentParameters;
 }
+
+public void SoundHeard(AgentSoccer agent)
+{
+    Debug.Log("Sound heard by: " + agent.gameObject.name + " with ID: " + agent.agentID);
+
+    GameObject ball = transform.parent.Find("Soccer Ball")?.gameObject; 
+    
+        Vector3 directionToSound = (ball.transform.position - agent.transform.position).normalized;
+
+        directionToSound.y = 0;
+
+        if (directionToSound != Vector3.zero && directionToSound.magnitude<= hearingRadius)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(directionToSound);
+            agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, lookRotation, Time.deltaTime * 5f);
+        }
+
+        agent.shouldPlaySound = false;
+    
+}
     public void MoveAgent(ActionSegment<int> act)
 {
- // Set the maximum hearing distance
-
     if (shouldPlaySound)
     {
-        Debug.Log("Sound heard by: " + gameObject.name + " with ID: " + agentID);
-        GameObject ball = GameObject.FindWithTag("ball"); // Find the ball by its tag
-        if (ball != null)
-        {
-            // Calculate the distance to the ball
-            float distanceToBall = Vector3.Distance(transform.position, ball.transform.position);
-
-            // Check if the ball is within the hearing radius
-            if (distanceToBall <= hearingRadius)
-            {
-                Vector3 directionToSound = (ball.transform.position - transform.position).normalized;
-                Quaternion lookRotation = Quaternion.LookRotation(directionToSound);
-
-                // Rotate towards the ball if not already aligned
-                if (Vector3.Dot(transform.forward, directionToSound) < 0.95f)
-                {
-                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
-                    return; // Skip movement logic while aligning
-                }
-                else
-                {
-                    shouldPlaySound = false; // Stop rotating once aligned
-                }
-            }
-        }
+        SoundHeard(this);
     }
 
     // Normal movement logic
@@ -254,7 +257,7 @@ public class AgentSoccer : Agent
             var dir = c.contacts[0].point - transform.position;
             dir = dir.normalized;
             c.gameObject.GetComponent<Rigidbody>().AddForce(dir * force);
-            shouldPlaySound = true; // Trigger sound on ball collision
+            shouldPlaySound = true;
         }
     }
 
