@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Policies;
+using UnityEngine.PlayerLoop;
 
 public enum Team
 {
@@ -31,6 +32,7 @@ public class AgentSoccer : Agent
     public Team team;
     float m_KickPower;
     float m_BallTouch;
+    public float hearingRadius = 5f;
     public Position position;
 
     //kick power (force) 2000 is default
@@ -38,7 +40,7 @@ public class AgentSoccer : Agent
     float m_Existential;
     float m_LateralSpeed;
     float m_ForwardSpeed;
-    bool shouldPlaySound;
+    public bool shouldPlaySound;
     int agentID;
     private static int nextAgentID = 1;
 
@@ -50,6 +52,21 @@ public class AgentSoccer : Agent
     public float rotSign;
 
     EnvironmentParameters m_ResetParams;
+
+    public void Update()
+    {
+        GameObject ball = GameObject.FindWithTag("ball");
+        if (ball != null)
+        {
+            float distanceToBall = Vector3.Distance(transform.position, ball.transform.position);
+            
+            if (distanceToBall <= hearingRadius)
+            {
+              
+                shouldPlaySound = true;
+            }
+        }
+    }
 
     public override void Initialize()
 {
@@ -107,24 +124,38 @@ public class AgentSoccer : Agent
 }
     public void MoveAgent(ActionSegment<int> act)
 {
-    // Sound influences movement if it should be played
+ // Set the maximum hearing distance
+
     if (shouldPlaySound)
     {
-        SoundManager.PlaySound(new Sound(transform.position, 10f));
-        Debug.Log("Sound heard by: " + agentID + " of object name: " + gameObject.name); // Log when sound is heard
-        shouldPlaySound = false;  // Reset after playing sound
+        Debug.Log("Sound heard by: " + gameObject.name + " with ID: " + agentID);
+        GameObject ball = GameObject.FindWithTag("ball"); // Find the ball by its tag
+        if (ball != null)
+        {
+            // Calculate the distance to the ball
+            float distanceToBall = Vector3.Distance(transform.position, ball.transform.position);
 
-        // Increase movement speed when sound is active
-        m_LateralSpeed *= 1.2f;
-        m_ForwardSpeed *= 1.2f;
-    }
-    else
-    {
-        // Use normal movement speeds if sound is inactive
-        m_LateralSpeed = (position == Position.Goalie) ? 1.5f : (position == Position.Striker) ? 0.5f : 0.3f;
-        m_ForwardSpeed = (position == Position.Goalie) ? 1.0f : (position == Position.Striker) ? 1.5f : 1.0f;
+            // Check if the ball is within the hearing radius
+            if (distanceToBall <= hearingRadius)
+            {
+                Vector3 directionToSound = (ball.transform.position - transform.position).normalized;
+                Quaternion lookRotation = Quaternion.LookRotation(directionToSound);
+
+                // Rotate towards the ball if not already aligned
+                if (Vector3.Dot(transform.forward, directionToSound) < 0.95f)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
+                    return; // Skip movement logic while aligning
+                }
+                else
+                {
+                    shouldPlaySound = false; // Stop rotating once aligned
+                }
+            }
+        }
     }
 
+    // Normal movement logic
     var dirToGo = Vector3.zero;
     var rotateDir = Vector3.zero;
 
@@ -166,8 +197,7 @@ public class AgentSoccer : Agent
     }
 
     transform.Rotate(rotateDir, Time.deltaTime * 100f);
-    agentRb.AddForce(dirToGo * m_SoccerSettings.agentRunSpeed,
-        ForceMode.VelocityChange);
+    agentRb.AddForce(dirToGo * m_SoccerSettings.agentRunSpeed, ForceMode.VelocityChange);
 }
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
