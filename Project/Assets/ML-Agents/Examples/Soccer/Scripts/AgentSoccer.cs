@@ -56,22 +56,7 @@ public class AgentSoccer : Agent
 
     public void Update()
     {
-        SoundHeard(this);
-
-        GameObject ball = transform.parent.Find("Soccer Ball")?.gameObject;
-        if (ball != null)
-        {
-            float distanceToBall = Vector3.Distance(this.transform.position, ball.transform.position);
-            
-            if (distanceToBall <= hearingRadius)
-            {
-              
-                shouldPlaySound = true;
-            }
-            else{
-                shouldPlaySound = false;
-            }
-        }
+        DetectAndRespondToSound();
 
         
         
@@ -132,30 +117,39 @@ public class AgentSoccer : Agent
     m_ResetParams = Academy.Instance.EnvironmentParameters;
 }
 
-public void SoundHeard(AgentSoccer agent)
+public void DetectAndRespondToSound()
 {
-    Debug.Log("Sound heard by: " + agent.gameObject.name + " with ID: " + agent.agentID);
+    Debug.Log("Sound detected by: " + agentID + " gameObject: " + gameObject.name);
+    GameObject ball = transform.parent.Find("Soccer Ball")?.gameObject;
+    if (ball == null) return;
 
-    GameObject ball = transform.parent.Find("Soccer Ball")?.gameObject; 
-    
-        Vector3 directionToSound = (ball.transform.position - agent.transform.position).normalized;
-
-        directionToSound.y = 0;
-
-        if (directionToSound != Vector3.zero && directionToSound.magnitude<= hearingRadius)
-        {
-            Quaternion lookRotation = Quaternion.LookRotation(directionToSound);
-            agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, lookRotation, Time.deltaTime * 5f);
-        }
-
-        agent.shouldPlaySound = false;
-    
+    float distanceToBall = Vector3.Distance(this.transform.position, ball.transform.position);
+    if (distanceToBall <= hearingRadius)
+    {
+        shouldPlaySound = true;
+        Vector3 directionToSound = (ball.transform.position - transform.position).normalized;
+        RotateTowards(directionToSound);
+    }
+    else
+    {
+        shouldPlaySound = false;
+    }
 }
-    public void MoveAgent(ActionSegment<int> act)
+
+private void RotateTowards(Vector3 direction)
+{
+    if(direction == Vector3.zero)
+    {
+        return;
+    }
+    Quaternion lookRotation = Quaternion.LookRotation(direction);
+    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 2f);
+}
+   public void MoveAgent(ActionSegment<int> act)
 {
     if (shouldPlaySound)
     {
-        SoundHeard(this);
+        DetectAndRespondToSound(); // Respond to sound before normal movement
     }
 
     // Normal movement logic
