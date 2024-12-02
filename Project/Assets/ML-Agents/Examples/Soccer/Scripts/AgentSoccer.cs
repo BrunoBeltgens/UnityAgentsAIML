@@ -33,8 +33,7 @@ public class AgentSoccer : Agent
     float m_BallTouch;
     public Position position;
 
-    //kick power (force) 2000 is default
-    const float k_Power = 200f;
+    const float k_Power = 2000f;
     float m_Existential;
     float m_LateralSpeed;
     float m_ForwardSpeed;
@@ -74,23 +73,15 @@ public class AgentSoccer : Agent
             initialPos = new Vector3(transform.position.x + 5f, .5f, transform.position.z);
             rotSign = -1f;
         }
-        if (position == Position.Goalie) //goalie movement speed
+        if (position == Position.Goalie)
         {
-            m_LateralSpeed = 1.5f;
+            m_LateralSpeed = 1.0f;
             m_ForwardSpeed = 1.0f;
-
-            //original speed
-            //m_LateralSpeed = 1.0f;
-            //m_ForwardSpeed = 1.0f;
         }
-        else if (position == Position.Striker) //striker movement speed
+        else if (position == Position.Striker)
         {
-            m_LateralSpeed = 0.5f;
-            m_ForwardSpeed = 1.5f;
-
-            //original speed
-            //m_LateralSpeed = 0.3f;
-            //m_ForwardSpeed = 1.3f;
+            m_LateralSpeed = 0.3f;
+            m_ForwardSpeed = 1.3f;
         }
         else
         {
