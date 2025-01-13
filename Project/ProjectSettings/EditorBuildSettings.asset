@@ -4,5 +4,10 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
-  m_configObjects: {}
+  m_Scenes:
+  - enabled: 1
+    path: Assets/ML-Agents/Examples/Soccer/Scenes/SoccerTwos.unity
+    guid: f8055e5dfa04643559678426a82225c1
+  m_configObjects:
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: c3eaac8472cf046c7a7e65beacd7e1f0,
+      type: 2}

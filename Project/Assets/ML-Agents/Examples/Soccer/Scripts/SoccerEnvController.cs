@@ -15,28 +15,12 @@ public class SoccerEnvController : MonoBehaviour
         [HideInInspector]
         public Rigidbody Rb;
     }
-
-
-    /// <summary>
-    /// Max Academy steps before this platform resets
-    /// </summary>
-    /// <returns></returns>
     [Tooltip("Max Environment Steps")] public int MaxEnvironmentSteps = 25000;
-
-    /// <summary>
-    /// The area bounds.
-    /// </summary>
-
-    /// <summary>
-    /// We will be changing the ground material based on success/failue
-    /// </summary>
 
     public GameObject ball;
     [HideInInspector]
     public Rigidbody ballRb;
     Vector3 m_BallStartingPos;
-
-    //List of Agents On Platform
     public List<PlayerInfo> AgentsList = new List<PlayerInfo>();
 
     private SoccerSettings m_SoccerSettings;
@@ -134,5 +118,11 @@ public class SoccerEnvController : MonoBehaviour
 
         //Reset Ball
         ResetBall();
+    }
+
+    public void KickBall(Vector3 kickDirection)
+    {
+        Sound sound = new Sound(ball.transform.position, 5f); 
+        SoundManager.PlaySound(sound);
     }
 }

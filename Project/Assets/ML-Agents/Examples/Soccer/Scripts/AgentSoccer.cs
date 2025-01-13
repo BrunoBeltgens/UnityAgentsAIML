@@ -1,4 +1,3 @@
-using ML_Agents.Scripts;
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -53,6 +52,9 @@ public class AgentSoccer : Agent
     public float ballID;
 
     EnvironmentParameters m_ResetParams;
+
+    private AudioSource audioSource;
+    public AudioClip moveSound;
 
     public void Update()
     {
@@ -115,24 +117,28 @@ public class AgentSoccer : Agent
     agentRb.maxAngularVelocity = 500;
 
     m_ResetParams = Academy.Instance.EnvironmentParameters;
+
+    audioSource = gameObject.AddComponent<AudioSource>();
+    audioSource.clip = moveSound;
+    audioSource.spatialize = true;
 }
 
 public void DetectAndRespondToSound()
 {
-    Debug.Log("Sound detected by: " + agentID + " gameObject: " + gameObject.name);
     GameObject ball = transform.parent.Find("Soccer Ball")?.gameObject;
     if (ball == null) return;
 
     float distanceToBall = Vector3.Distance(this.transform.position, ball.transform.position);
     if (distanceToBall <= hearingRadius)
     {
-        shouldPlaySound = true;
         Vector3 directionToSound = (ball.transform.position - transform.position).normalized;
-        RotateTowards(directionToSound);
-    }
-    else
-    {
-        shouldPlaySound = false;
+        // Add the sound observation to the agent's state
+        if (!audioSource.isPlaying)
+        {
+            PlayMovementSound();
+        }
+        // Rotate towards the sound source
+        //RotateTowards(directionToSound);
     }
 }
 
@@ -149,10 +155,9 @@ private void RotateTowards(Vector3 direction)
 {
     if (shouldPlaySound)
     {
-        DetectAndRespondToSound(); // Respond to sound before normal movement
+        DetectAndRespondToSound();
     }
 
-    // Normal movement logic
     var dirToGo = Vector3.zero;
     var rotateDir = Vector3.zero;
 
@@ -195,7 +200,21 @@ private void RotateTowards(Vector3 direction)
 
     transform.Rotate(rotateDir, Time.deltaTime * 100f);
     agentRb.AddForce(dirToGo * m_SoccerSettings.agentRunSpeed, ForceMode.VelocityChange);
+
+    if (dirToGo != Vector3.zero)
+    {
+        PlayMovementSound();
+    }
 }
+
+    private void PlayMovementSound()
+    {
+        if (!audioSource.isPlaying && shouldPlaySound)
+        {
+            audioSource.Play();
+        }
+    }
+
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
         if (position == Position.Goalie)
@@ -239,24 +258,32 @@ private void RotateTowards(Vector3 direction)
     }
 
     void OnCollisionEnter(Collision c)
-    {
-        var force = k_Power * m_KickPower;
-        if (position == Position.Goalie)
-        {
-            force = k_Power;
-        }
+    {        
         if (c.gameObject.CompareTag("ball"))
         {
-            AddReward(.2f * m_BallTouch);
             var dir = c.contacts[0].point - transform.position;
             dir = dir.normalized;
-            c.gameObject.GetComponent<Rigidbody>().AddForce(dir * force);
             shouldPlaySound = true;
+            m_KickPower = k_Power;
+            
+            // Apply force to the ball using m_KickPower
+            Rigidbody ballRb = c.gameObject.GetComponent<Rigidbody>();
+            if (ballRb != null)
+            {
+                ballRb.AddForce(dir * m_KickPower, ForceMode.Impulse);
+            }
         }
     }
 
     public override void OnEpisodeBegin()
     {
         m_BallTouch = m_ResetParams.GetWithDefault("ball_touch", 0);
+    }
+
+    public void HearSound(Unity.MLAgents.Sound sound)
+    {
+        // Handle the sound detection stuff here
+        Debug.Log($"Sound heard at {sound.Position} with radius {sound.Radius}");
+        shouldPlaySound = true;
     }
 }
