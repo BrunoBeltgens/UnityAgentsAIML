@@ -2689,6 +2689,8 @@ MonoBehaviour:
   MaxEnvironmentSteps: 5000
   ball: {fileID: 1682753582128710}
   ballRb: {fileID: 0}
+  BlueTeamGoals: 0
+  PurpleTeamGoals: 0
   AgentsList:
   - Agent: {fileID: 114850431417842684}
     StartingPos: {x: 0, y: 0, z: 0}

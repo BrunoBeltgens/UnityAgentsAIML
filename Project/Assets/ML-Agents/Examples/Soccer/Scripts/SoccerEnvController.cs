@@ -20,6 +20,22 @@ public class SoccerEnvController : MonoBehaviour
     public GameObject ball;
     [HideInInspector]
     public Rigidbody ballRb;
+
+    // Performance metrics
+    public int BlueTeamGoals = 0;
+    public int PurpleTeamGoals = 0;
+    // To get the average goal accuracy we need the sum and the number of attempts
+    public static float BlueTeamGoalAccuracySum = 0.0f;
+    public static int BlueTeamGoalAttempts = 0;
+    public static float PurpleTeamGoalAccuracySum = 0.0f;
+    public static int PurpleTeamGoalAttempts = 0;
+    // Blocked Shots
+    public static int BlueTeamBlockedShots = 0;
+    public static int PurpleTeamBlockedShots = 0;
+    // Total Possession Time
+    public static float BlueTeamTotalPossessionTime = 0.0f;
+    public static float PurpleTeamTotalPossessionTime = 0.0f;
+
     Vector3 m_BallStartingPos;
     public List<PlayerInfo> AgentsList = new List<PlayerInfo>();
 
@@ -94,6 +110,16 @@ public class SoccerEnvController : MonoBehaviour
         }
         m_PurpleAgentGroup.EndGroupEpisode();
         m_BlueAgentGroup.EndGroupEpisode();
+
+        if (scoredTeam == Team.Blue)
+        {
+            BlueTeamGoals++;
+        }
+        else
+        {
+            PurpleTeamGoals++;
+        }
+
         ResetScene();
 
     }
@@ -102,6 +128,16 @@ public class SoccerEnvController : MonoBehaviour
     public void ResetScene()
     {
         m_ResetTimer = 0;
+
+        Debug.Log("");
+        Debug.Log($"Blue Team Goals: {BlueTeamGoals}");
+        Debug.Log($"Purple Team Goals: {PurpleTeamGoals}");
+        Debug.Log($"Blue Team Goal Accuracy: {BlueTeamGoalAccuracySum / (BlueTeamGoalAttempts == 0 ? 1 : BlueTeamGoalAttempts)}");
+        Debug.Log($"Purple Team Goal Accuracy: {PurpleTeamGoalAccuracySum / (PurpleTeamGoalAttempts == 0 ? 1 : PurpleTeamGoalAttempts)}");
+        Debug.Log($"Blue Team Blocked Shots: {BlueTeamBlockedShots}");
+        Debug.Log($"Purple Team Blocked Shots: {PurpleTeamBlockedShots}");
+        Debug.Log($"Blue Team Total Possession Time: {BlueTeamTotalPossessionTime}");
+        Debug.Log($"Purple Team Total Possession Time: {PurpleTeamTotalPossessionTime}");
 
         //Reset Agents
         foreach (var item in AgentsList)
