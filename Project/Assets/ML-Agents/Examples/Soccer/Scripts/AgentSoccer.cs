@@ -35,7 +35,7 @@ public class AgentSoccer : Agent
     public Position position;
 
     //kick power (force) 2000 is default
-    const float k_Power = 200f;
+    const float k_Power = 10f;
     float m_Existential;
     float m_LateralSpeed;
     float m_ForwardSpeed;
@@ -51,11 +51,9 @@ public class AgentSoccer : Agent
     public float rotSign;
     public float ballID;
     private GameObject ball;
-    private GameObject lastAgentToTouchBall = null; // Tracks last agent
-    private string lastTeamToControlBall; // Tracks team in possession using tag
-    private float possessionTime = 0f; // Tracks the current possession time
     private const float possessionRewardRate = 0.05f; // Reward per second of possession
     private Vector3 opponentGoalPosition;
+    private SoccerEnvController envController;
 
     EnvironmentParameters m_ResetParams;
 
@@ -68,10 +66,9 @@ public class AgentSoccer : Agent
     }
 
     public override void Initialize()
-{
+    {
     shouldPlaySound = false;
     ball = transform.parent.Find("Soccer Ball")?.gameObject;
-    opponentGoalPosition = initialPos + new Vector3(rotSign * 25.0f, 0, 0); 
 
     // Only assign a new agentID if it hasn't been set (i.e., if it’s 0)
     if (agentID == 0)
@@ -79,7 +76,7 @@ public class AgentSoccer : Agent
         agentID = nextAgentID++;
     }
 
-    SoccerEnvController envController = GetComponentInParent<SoccerEnvController>();
+    envController = GetComponentInParent<SoccerEnvController>();
     if (envController != null)
     {
         m_Existential = 1f / envController.MaxEnvironmentSteps;
@@ -102,6 +99,7 @@ public class AgentSoccer : Agent
         initialPos = new Vector3(transform.position.x + 5f, .5f, transform.position.z);
         rotSign = -1f;
     }
+
     if (position == Position.Goalie)
     {
         m_LateralSpeed = 1.5f;
@@ -125,7 +123,8 @@ public class AgentSoccer : Agent
 
     audioSource = gameObject.AddComponent<AudioSource>();
     audioSource.clip = moveSound;
-    audioSource.spatialize = true;
+    audioSource.spatialize = true;    
+    opponentGoalPosition = initialPos + new Vector3(rotSign * 25.0f, 0, 0); 
 }
 
 public void DetectAndRespondToSound()
@@ -160,14 +159,13 @@ private void RotateTowards(Vector3 direction)
 private bool BallIsShot(string agentTag)
 {
     if (ball == null) return false;
-    //Debug.DrawLine(transform.position, opponentGoalPosition, Color.red, 2.0f); // Draw a line to the opponent's goal position
-    //Debug.Log($"Opponent Goal Position: {opponentGoalPosition}"); // Log the position for debugging
+    // Debug.DrawLine(transform.position, opponentGoalPosition, Color.red, 2.0f); // Draw a line to the opponent's goal position
+    // Debug.Log($"Opponent Goal Position: {opponentGoalPosition}"); // Log the position for debugging
 
     // Check if the ball's velocity is above a threshold and is moving towards the opponent's goal.
     Vector3 ballVelocity = ball.GetComponent<Rigidbody>().velocity;
     Vector3 directionToGoal = opponentGoalPosition - ball.transform.position;
     float dotProduct = Vector3.Dot(ballVelocity.normalized, directionToGoal.normalized);
-    Debug.Log($"Dot Product: {dotProduct}");
 
     if (agentTag == "blueAgent")
     {
@@ -325,26 +323,33 @@ private bool BallIsBlocked()
                 AddReward(0.2f);
             }
 
-            if (agentTag != lastTeamToControlBall) // Possession changed
+            Debug.Log("Ball touched by agent: " + gameObject.tag);
+            if (agentTag != envController.lastTeamToControlBall) // Possession changed
             {
+                Debug.Log($"Possession changed from {envController.lastTeamToControlBall} to {agentTag}");
                 // Penalize the previous team for losing possession
-                if (lastAgentToTouchBall != null)
+                if (envController.lastAgentToTouchBall != null)
                 {
-                    lastAgentToTouchBall.GetComponent<AgentSoccer>().AddReward(-0.2f); // Penalty
+                    envController.lastAgentToTouchBall.GetComponent<AgentSoccer>().AddReward(-0.05f); // Penalty
                 }
                 // Reset possession timer
                 if(agentTag == "blueAgent")
-                {
-                    SoccerEnvController.BlueTeamTotalPossessionTime += possessionTime;
+                {            
+                    Debug.Log("To add to Purple team possession time: " + envController.possessionTime);
+                    SoccerEnvController.PurpleTeamTotalPossessionTime += envController.possessionTime;
+                    Debug.Log("Purple team possession time: " + SoccerEnvController.PurpleTeamTotalPossessionTime);
                 }
                 else if(agentTag == "purpleAgent")
                 {                    
-                    SoccerEnvController.PurpleTeamTotalPossessionTime += possessionTime;
+                    Debug.Log("To add to Blue team possession time: " + envController.possessionTime);
+                    SoccerEnvController.BlueTeamTotalPossessionTime += envController.possessionTime;
+                    Debug.Log("Blue team possession time: " + SoccerEnvController.BlueTeamTotalPossessionTime);
                 }
-                possessionTime = 0f;
+                envController.possessionTime = 0f;
+                envController.rel_possessionTime = 0f;
             }
-            lastAgentToTouchBall = gameObject; // Update to current agent
-            lastTeamToControlBall = agentTag;
+            envController.lastAgentToTouchBall = gameObject; // Update to current agent
+            envController.lastTeamToControlBall = agentTag;
 
             AddReward(.2f * m_BallTouch);
 
@@ -364,14 +369,12 @@ private bool BallIsBlocked()
 
     void FixedUpdate()
     {
-        
-        possessionTime += Time.fixedDeltaTime;
 
         // Reward for every second of possession
-        if (possessionTime >= 1f)
+        if (envController.possessionTime - envController.rel_possessionTime >= 1f)
         {
             AddReward(possessionRewardRate); // Reward based on possession duration
-            possessionTime = 0f; // Reset timer
+            envController.rel_possessionTime = envController.possessionTime; // Reset timer
         }
 
         if (ball != null) // If the ball exists, reward agent for moving it closer to the opponent's goal
@@ -397,6 +400,5 @@ private bool BallIsBlocked()
         // Handle the sound detection stuff here
         Debug.Log($"Sound heard at {sound.Position} with radius {sound.Radius}");
         shouldPlaySound = true;
-        possessionTime = 0f; // Reset possession time
     }
 }

@@ -24,6 +24,13 @@ public class SoccerEnvController : MonoBehaviour
     // Performance metrics
     public int BlueTeamGoals = 0;
     public int PurpleTeamGoals = 0;
+
+    // Possession Time
+    public float possessionTime = 0f;
+    public float rel_possessionTime = 0f;
+    public GameObject lastAgentToTouchBall;
+    public string lastTeamToControlBall;
+
     // To get the average goal accuracy we need the sum and the number of attempts
     public static float BlueTeamGoalAccuracySum = 0.0f;
     public static int BlueTeamGoalAttempts = 0;
@@ -56,6 +63,7 @@ public class SoccerEnvController : MonoBehaviour
         m_PurpleAgentGroup = new SimpleMultiAgentGroup();
         ballRb = ball.GetComponent<Rigidbody>();
         m_BallStartingPos = new Vector3(ball.transform.position.x, ball.transform.position.y, ball.transform.position.z);
+        
         foreach (var item in AgentsList)
         {
             item.StartingPos = item.Agent.transform.position;
@@ -75,6 +83,7 @@ public class SoccerEnvController : MonoBehaviour
 
     void FixedUpdate()
     {
+        possessionTime += Time.fixedDeltaTime;
         m_ResetTimer += 1;
         if (m_ResetTimer >= MaxEnvironmentSteps && MaxEnvironmentSteps > 0)
         {
@@ -132,12 +141,17 @@ public class SoccerEnvController : MonoBehaviour
         Debug.Log("");
         Debug.Log($"Blue Team Goals: {BlueTeamGoals}");
         Debug.Log($"Purple Team Goals: {PurpleTeamGoals}");
-        Debug.Log($"Blue Team Goal Accuracy: {BlueTeamGoalAccuracySum / (BlueTeamGoalAttempts == 0 ? 1 : BlueTeamGoalAttempts)}");
-        Debug.Log($"Purple Team Goal Accuracy: {PurpleTeamGoalAccuracySum / (PurpleTeamGoalAttempts == 0 ? 1 : PurpleTeamGoalAttempts)}");
+        Debug.Log($"Blue Team Shot Accuracy: {BlueTeamGoalAccuracySum / (BlueTeamGoalAttempts == 0 ? 1 : BlueTeamGoalAttempts)}");
+        Debug.Log($"Purple Team Shot Accuracy: {PurpleTeamGoalAccuracySum / (PurpleTeamGoalAttempts == 0 ? 1 : PurpleTeamGoalAttempts)}");
         Debug.Log($"Blue Team Blocked Shots: {BlueTeamBlockedShots}");
         Debug.Log($"Purple Team Blocked Shots: {PurpleTeamBlockedShots}");
         Debug.Log($"Blue Team Total Possession Time: {BlueTeamTotalPossessionTime}");
         Debug.Log($"Purple Team Total Possession Time: {PurpleTeamTotalPossessionTime}");
+
+        possessionTime = 0f;
+        rel_possessionTime = 0f;
+        lastAgentToTouchBall = null;
+        lastTeamToControlBall = null;
 
         //Reset Agents
         foreach (var item in AgentsList)
