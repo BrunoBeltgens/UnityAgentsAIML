@@ -93,7 +93,7 @@ namespace MLAgents.Soccer
 
             float normalizedDistance = distance / hearingRadius;
             float intensity = 0f;
-            //for ball, intensity is 1 if moving, 0 if not moving
+            // For ball, intensity is 1 if moving, 0 if not moving
             if (sourceType == 1.0f) 
             {
                 var ballRb = envController.ballRb;
