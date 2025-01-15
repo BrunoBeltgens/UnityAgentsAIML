@@ -51,7 +51,7 @@ public class AgentSoccer : Agent
     public float rotSign;
     public float ballID;
     private GameObject ball;
-    private const float possessionRewardRate = 0.05f; // Reward per second of possession
+    private const float possessionRewardRate = 0.005f; // Reward per second of possession
     private Vector3 opponentGoalPosition;
     private SoccerEnvController envController;
 
@@ -292,10 +292,10 @@ private bool BallIsBlocked()
                 AddReward(0.2f);
             }
 
-            Debug.Log("Ball touched by agent: " + gameObject.tag);
+            //Debug.Log("Ball touched by agent: " + gameObject.tag);
             if (agentTag != envController.lastTeamToControlBall) // Possession changed
             {
-                Debug.Log($"Possession changed from {envController.lastTeamToControlBall} to {agentTag}");
+                //Debug.Log($"Possession changed from {envController.lastTeamToControlBall} to {agentTag}");
                 // Penalize the previous team for losing possession
                 if (envController.lastAgentToTouchBall != null)
                 {
@@ -304,15 +304,11 @@ private bool BallIsBlocked()
                 // Reset possession timer
                 if(agentTag == "blueAgent")
                 {            
-                    Debug.Log("To add to Purple team possession time: " + envController.possessionTime);
                     SoccerEnvController.PurpleTeamTotalPossessionTime += envController.possessionTime;
-                    Debug.Log("Purple team possession time: " + SoccerEnvController.PurpleTeamTotalPossessionTime);
                 }
                 else if(agentTag == "purpleAgent")
                 {                    
-                    Debug.Log("To add to Blue team possession time: " + envController.possessionTime);
                     SoccerEnvController.BlueTeamTotalPossessionTime += envController.possessionTime;
-                    Debug.Log("Blue team possession time: " + SoccerEnvController.BlueTeamTotalPossessionTime);
                 }
                 envController.possessionTime = 0f;
                 envController.rel_possessionTime = 0f;
@@ -328,8 +324,7 @@ private bool BallIsBlocked()
             Rigidbody ballRb = c.gameObject.GetComponent<Rigidbody>();
             if (ballRb != null)
             {
-                                ballRb.AddForce(dir * m_KickPower, ForceMode.Impulse);
-
+                ballRb.AddForce(dir * m_KickPower, ForceMode.Impulse);
             }
         }
     }
@@ -342,17 +337,6 @@ private bool BallIsBlocked()
         {
             AddReward(possessionRewardRate); // Reward based on possession duration
             envController.rel_possessionTime = envController.possessionTime; // Reset timer
-        }
-
-        if (ball != null) // If the ball exists, reward agent for moving it closer to the opponent's goal
-        {
-            float distanceToGoal = Vector3.Distance(ball.transform.position, opponentGoalPosition);
-            float fieldCenterZ = 0f; // Assuming the field is centered around Z=0
-            float distanceFromCenter = Mathf.Abs(ball.transform.position.z - fieldCenterZ);
-
-            // Reward for moving ball closer to the opponent's goal
-            float reward = Mathf.Exp(-distanceToGoal / 5f); // Exponential reward
-            AddReward(reward);
         }
     }
 

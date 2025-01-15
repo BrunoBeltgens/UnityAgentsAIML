@@ -9,8 +9,11 @@ public class SoccerEnvController : MonoBehaviour
     public class PlayerInfo
     {
         public AgentSoccer Agent;
-        public Transform StartingPos;
+        public Vector3 StartingPos;
         //public AudioSource AudioSource;
+        public Quaternion StartingRot;
+        [HideInInspector]
+        public Rigidbody Rb;
     }
     [Tooltip("Max Environment Steps")] public int MaxEnvironmentSteps = 25000;
 
@@ -80,7 +83,9 @@ public class SoccerEnvController : MonoBehaviour
 
         foreach (var item in AgentsList)
         {
-            item.StartingPos = item.Agent.transform;
+            item.StartingPos = item.Agent.transform.position;
+            item.StartingRot = item.Agent.transform.rotation;
+            item.Rb = item.Agent.GetComponent<Rigidbody>();
             if (item.Agent.team == Team.Blue)
             {
                 m_BlueAgentGroup.RegisterAgent(item.Agent);
@@ -150,7 +155,7 @@ public class SoccerEnvController : MonoBehaviour
     {
         m_ResetTimer = 0;
 
-        Debug.Log("");
+        Debug.Log("____________________________");
         Debug.Log($"Blue Team Goals: {BlueTeamGoals}");
         Debug.Log($"Purple Team Goals: {PurpleTeamGoals}");
         Debug.Log($"Blue Team Shot Accuracy: {BlueTeamGoalAccuracySum / (BlueTeamGoalAttempts == 0 ? 1 : BlueTeamGoalAttempts)}");
@@ -168,13 +173,14 @@ public class SoccerEnvController : MonoBehaviour
         //Reset Agents
         foreach (var item in AgentsList)
         {
-            if (item.Agent != null)
-            {
-                item.Agent.transform.position = item.StartingPos.position;
-                item.Agent.transform.rotation = item.StartingPos.rotation;
-                item.Agent.GetComponent<Rigidbody>().velocity = Vector3.zero;
-                item.Agent.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-            }
+            var randomPosX = Random.Range(-5f, 5f);
+            var newStartPos = item.Agent.initialPos + new Vector3(randomPosX, 0f, 0f);
+            var rot = item.Agent.rotSign * Random.Range(80.0f, 100.0f);
+            var newRot = Quaternion.Euler(0, rot, 0);
+            item.Agent.transform.SetPositionAndRotation(newStartPos, newRot);
+
+            item.Rb.velocity = Vector3.zero;
+            item.Rb.angularVelocity = Vector3.zero;
         }
 
         //Reset Ball
