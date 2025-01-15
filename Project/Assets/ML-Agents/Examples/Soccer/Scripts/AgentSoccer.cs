@@ -50,6 +50,12 @@ public class AgentSoccer : Agent
     public Vector3 initialPos;
     public float rotSign;
     public float ballID;
+    private GameObject ball;
+    private GameObject lastAgentToTouchBall = null; // Tracks last agent
+    private string lastTeamToControlBall; // Tracks team in possession using tag
+    private float possessionTime = 0f; // Tracks the current possession time
+    private const float possessionRewardRate = 0.05f; // Reward per second of possession
+    private Vector3 opponentGoalPosition;
 
     EnvironmentParameters m_ResetParams;
 
@@ -59,14 +65,13 @@ public class AgentSoccer : Agent
     public void Update()
     {
         DetectAndRespondToSound();
-
-        
-        
     }
 
     public override void Initialize()
 {
     shouldPlaySound = false;
+    ball = transform.parent.Find("Soccer Ball")?.gameObject;
+    opponentGoalPosition = initialPos + new Vector3(rotSign * 25.0f, 0, 0); 
 
     // Only assign a new agentID if it hasn't been set (i.e., if it’s 0)
     if (agentID == 0)
@@ -151,6 +156,47 @@ private void RotateTowards(Vector3 direction)
     Quaternion lookRotation = Quaternion.LookRotation(direction);
     transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 2f);
 }
+
+private bool BallIsShot(string agentTag)
+{
+    if (ball == null) return false;
+    //Debug.DrawLine(transform.position, opponentGoalPosition, Color.red, 2.0f); // Draw a line to the opponent's goal position
+    //Debug.Log($"Opponent Goal Position: {opponentGoalPosition}"); // Log the position for debugging
+
+    // Check if the ball's velocity is above a threshold and is moving towards the opponent's goal.
+    Vector3 ballVelocity = ball.GetComponent<Rigidbody>().velocity;
+    Vector3 directionToGoal = opponentGoalPosition - ball.transform.position;
+    float dotProduct = Vector3.Dot(ballVelocity.normalized, directionToGoal.normalized);
+    Debug.Log($"Dot Product: {dotProduct}");
+
+    if (agentTag == "blueAgent")
+    {
+        SoccerEnvController.BlueTeamGoalAccuracySum += dotProduct; // Track goal accuracy for blue team
+        SoccerEnvController.BlueTeamGoalAttempts++; // Track number of shots for blue team
+    }
+    else if (agentTag == "purpleAgent")
+    {
+        SoccerEnvController.PurpleTeamGoalAccuracySum += dotProduct; // Track goal accuracy for purple team
+        SoccerEnvController.PurpleTeamGoalAttempts++; // Track number of shots for purple team
+    }
+    return ballVelocity.magnitude > 2.0f && dotProduct > 0.8f; // Ball is moving towards the opponent's goal significantly.
+}
+
+private bool BallIsBlocked()
+{
+    if (ball == null) return false;
+
+    // Check if the ball's position is close to the agent, and its velocity is reduced.
+    Vector3 ballPosition = ball.transform.position;
+    Vector3 agentPosition = transform.position;
+
+    float distance = Vector3.Distance(ballPosition, agentPosition);
+
+    // Assume the ball is blocked if it's near the agent and its velocity is below a threshold.
+    Rigidbody ballRb = ball.GetComponent<Rigidbody>();
+    return distance < 1.5f && ballRb.velocity.magnitude < 1.0f;
+}
+
    public void MoveAgent(ActionSegment<int> act)
 {
     if (shouldPlaySound)
@@ -259,8 +305,49 @@ private void RotateTowards(Vector3 direction)
 
     void OnCollisionEnter(Collision c)
     {        
-        if (c.gameObject.CompareTag("ball"))
+        if (c.gameObject.CompareTag("ball") && (gameObject.CompareTag("blueAgent") || gameObject.CompareTag("purpleAgent")))
         {
+            string agentTag = gameObject.tag;
+            if (BallIsShot(agentTag))
+            {
+                AddReward(0.2f);
+            }
+            if (BallIsBlocked())
+            {
+                if (gameObject.CompareTag("blueAgent"))
+                {
+                    SoccerEnvController.BlueTeamBlockedShots++; // Track blocked shots for blue team
+                }
+                else if (gameObject.CompareTag("purpleAgent"))
+                {
+                    SoccerEnvController.PurpleTeamBlockedShots++; // Track blocked shots for purple team
+                }
+                AddReward(0.2f);
+            }
+
+            if (agentTag != lastTeamToControlBall) // Possession changed
+            {
+                // Penalize the previous team for losing possession
+                if (lastAgentToTouchBall != null)
+                {
+                    lastAgentToTouchBall.GetComponent<AgentSoccer>().AddReward(-0.2f); // Penalty
+                }
+                // Reset possession timer
+                if(agentTag == "blueAgent")
+                {
+                    SoccerEnvController.BlueTeamTotalPossessionTime += possessionTime;
+                }
+                else if(agentTag == "purpleAgent")
+                {                    
+                    SoccerEnvController.PurpleTeamTotalPossessionTime += possessionTime;
+                }
+                possessionTime = 0f;
+            }
+            lastAgentToTouchBall = gameObject; // Update to current agent
+            lastTeamToControlBall = agentTag;
+
+            AddReward(.2f * m_BallTouch);
+
             var dir = c.contacts[0].point - transform.position;
             dir = dir.normalized;
             shouldPlaySound = true;
@@ -275,6 +362,31 @@ private void RotateTowards(Vector3 direction)
         }
     }
 
+    void FixedUpdate()
+    {
+        
+        possessionTime += Time.fixedDeltaTime;
+
+        // Reward for every second of possession
+        if (possessionTime >= 1f)
+        {
+            AddReward(possessionRewardRate); // Reward based on possession duration
+            possessionTime = 0f; // Reset timer
+        }
+
+        if (ball != null) // If the ball exists, reward agent for moving it closer to the opponent's goal
+        {
+            float distanceToGoal = Vector3.Distance(ball.transform.position, opponentGoalPosition);
+            float fieldCenterZ = 0f; // Assuming the field is centered around Z=0
+            float distanceFromCenter = Mathf.Abs(ball.transform.position.z - fieldCenterZ);
+
+            // Reward for moving ball closer to the opponent's goal
+            float reward = Mathf.Exp(-distanceToGoal / 5f); // Exponential reward
+            AddReward(reward);
+        }
+    }
+
+
     public override void OnEpisodeBegin()
     {
         m_BallTouch = m_ResetParams.GetWithDefault("ball_touch", 0);
@@ -285,5 +397,6 @@ private void RotateTowards(Vector3 direction)
         // Handle the sound detection stuff here
         Debug.Log($"Sound heard at {sound.Position} with radius {sound.Radius}");
         shouldPlaySound = true;
+        possessionTime = 0f; // Reset possession time
     }
 }
