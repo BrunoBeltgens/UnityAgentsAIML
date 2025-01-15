@@ -97,18 +97,31 @@ namespace MLAgents.Soccer
             if (sourceType == 1.0f) 
             {
                 var ballRb = envController.ballRb;
-                intensity = ballRb.velocity.magnitude > 0.1f ? 1f : 0f;
+                if(ballRb.velocity.magnitude > 0.1f){
+                    intensity = 1;
+                }
                 log.AppendLine($"  Ball: dist={distance:F2}, normDist={normalizedDistance:F2}, intensity={intensity:F2} (moving={intensity > 0})");
             }
             else 
             {
-                intensity = 1f - normalizedDistance;
+                if(agentSoccer.GetComponent<Rigidbody>().velocity.magnitude > 0.1f){
+                    intensity = 1;
+                    Debug.Log($"agent is moving with velocity {agentSoccer.GetComponent<Rigidbody>().velocity.magnitude}");
+                }
                 log.AppendLine($"  {sourceName}: dist={distance:F2}, normDist={normalizedDistance:F2}, intensity={intensity:F2}");
             }
 
-            observations[index++] = normalizedDistance;
-            observations[index++] = intensity;
-            observations[index++] = sourceType;
+            if(intensity == 1){
+                Debug.Log($"[AudioSensor] {sourceName} is moving");
+                observations[index++] = normalizedDistance;
+                observations[index++] = intensity;
+                observations[index++] = sourceType;
+            }
+            else{
+                observations[index++] = 1.0f;
+                observations[index++] = 0.0f;
+                observations[index++] = sourceType;
+            }
         }
 
         public void Update() { }

@@ -50,10 +50,10 @@ public class SoccerEnvController : MonoBehaviour
         m_BallStartingPos = ball.transform.position;
         
         // Add a single AudioListener to the environment controller
-        if (FindObjectOfType<AudioListener>() == null)
-        {
-            gameObject.AddComponent<AudioListener>();
-        }
+        // if (FindObjectOfType<AudioListener>() == null)
+        // {
+        //     gameObject.AddComponent<AudioListener>();
+        // }
 
         foreach (var item in AgentsList)
         {
@@ -134,6 +134,5 @@ public class SoccerEnvController : MonoBehaviour
 
     public void KickBall(Vector3 kickDirection)
     {
-        // The audio functionality is now handled by AudioSensor
     }
 }
