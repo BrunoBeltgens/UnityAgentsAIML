@@ -6,7 +6,6 @@ namespace MLAgents.Soccer
     public class AudioSensorComponent : SensorComponent
     {
         [SerializeField] private string sensorName = "AudioSensor";
-        [SerializeField] private float hearingRadius;
         
         private AgentSoccer agentSoccer;
         private SoccerEnvController envController;
@@ -15,7 +14,6 @@ namespace MLAgents.Soccer
         void Start()
         {
             InitializeDependencies();
-            hearingRadius = agentSoccer.HearingRadius;
         }
 
         private void InitializeDependencies()
@@ -47,7 +45,7 @@ namespace MLAgents.Soccer
             }
 
             isInitialized = true;
-            Debug.Log($"[AudioSensorComponent] Initialized on {gameObject.name} with radius {hearingRadius}");
+            Debug.Log($"[AudioSensorComponent] Initialized on {gameObject.name} with radius {agentSoccer.HearingRadius}");
         }
 
         public override ISensor[] CreateSensors()
@@ -63,7 +61,7 @@ namespace MLAgents.Soccer
                 return new ISensor[0];
             }
 
-            return new ISensor[] { new AudioSensor(sensorName, agentSoccer, envController, hearingRadius) };
+            return new ISensor[] { new AudioSensor(sensorName, agentSoccer, envController, agentSoccer.HearingRadius) };
         }
     }
 }

@@ -2278,14 +2278,13 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   team: 0
-  hearingRadius: 10
+  hearingRadius: 100
   position: 2
   shouldPlaySound: 0
   agentRb: {fileID: 0}
   initialPos: {x: 0, y: 0, z: 0}
   rotSign: 0
   ballID: 0
-  moveSound: {fileID: 0}
 --- !u!114 &114320493772006642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2361,7 +2360,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sensorName: AudioSensor
-  hearingRadius: 5
 --- !u!1 &1101518129530804
 GameObject:
   m_ObjectHideFlags: 0
@@ -2581,14 +2579,13 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   team: 1
-  hearingRadius: 10
+  hearingRadius: 100
   position: 2
   shouldPlaySound: 0
   agentRb: {fileID: 0}
   initialPos: {x: 0, y: 0, z: 0}
   rotSign: 0
   ballID: 0
-  moveSound: {fileID: 0}
 --- !u!114 &114516244030127556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2664,7 +2661,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sensorName: AudioSensor
-  hearingRadius: 5
 --- !u!1 &1141134673700168
 GameObject:
   m_ObjectHideFlags: 0
@@ -4300,14 +4296,13 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   team: 0
-  hearingRadius: 10
+  hearingRadius: 100
   position: 2
   shouldPlaySound: 0
   agentRb: {fileID: 0}
   initialPos: {x: 0, y: 0, z: 0}
   rotSign: 0
   ballID: 0
-  moveSound: {fileID: 0}
 --- !u!114 &1023485123796557062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4383,7 +4378,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sensorName: AudioSensor
-  hearingRadius: 5
 --- !u!1 &6442519122303792292
 GameObject:
   m_ObjectHideFlags: 0
@@ -4857,14 +4851,13 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   team: 1
-  hearingRadius: 10
+  hearingRadius: 100
   position: 2
   shouldPlaySound: 0
   agentRb: {fileID: 0}
   initialPos: {x: 0, y: 0, z: 0}
   rotSign: 0
   ballID: 0
-  moveSound: {fileID: 0}
 --- !u!114 &2562571719799803906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4940,7 +4933,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sensorName: AudioSensor
-  hearingRadius: 5
 --- !u!1 &8673569163220857793
 GameObject:
   m_ObjectHideFlags: 0
