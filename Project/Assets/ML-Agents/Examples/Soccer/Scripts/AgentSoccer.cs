@@ -57,7 +57,7 @@ public class AgentSoccer : Agent
         soundSensor = GetComponent<SoundSensor>();
         if (soundSensor == null)
         {
-            Debug.LogWarning("SoundSensor not found");
+            soundSensor = gameObject.AddComponent<SoundSensor>();
         }
         SoccerEnvController envController = GetComponentInParent<SoccerEnvController>();
         if (envController != null)
