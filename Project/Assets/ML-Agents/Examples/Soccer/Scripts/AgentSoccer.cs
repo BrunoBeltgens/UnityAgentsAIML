@@ -1,7 +1,9 @@
+using ML_Agents.Examples.Soccer.Scripts;
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Policies;
+using Unity.MLAgents.Sensors;
 
 public enum Team
 {
@@ -45,11 +47,18 @@ public class AgentSoccer : Agent
     BehaviorParameters m_BehaviorParameters;
     public Vector3 initialPos;
     public float rotSign;
+    public GameObject ballObject;
+    private SoundSensor soundSensor;
 
     EnvironmentParameters m_ResetParams;
 
     public override void Initialize()
     {
+        soundSensor = GetComponent<SoundSensor>();
+        if (soundSensor == null)
+        {
+            Debug.LogWarning("SoundSensor not found");
+        }
         SoccerEnvController envController = GetComponentInParent<SoccerEnvController>();
         if (envController != null)
         {
@@ -93,6 +102,7 @@ public class AgentSoccer : Agent
         agentRb.maxAngularVelocity = 500;
 
         m_ResetParams = Academy.Instance.EnvironmentParameters;
+        base.Initialize();
     }
 
     public void MoveAgent(ActionSegment<int> act)
@@ -140,6 +150,10 @@ public class AgentSoccer : Agent
         transform.Rotate(rotateDir, Time.deltaTime * 100f);
         agentRb.AddForce(dirToGo * m_SoccerSettings.agentRunSpeed,
             ForceMode.VelocityChange);
+        if (dirToGo != Vector3.zero)
+        {
+            soundSensor?.hearSound(transform.position, 2.0f);
+        }
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -155,6 +169,12 @@ public class AgentSoccer : Agent
         {
             // Existential penalty for Strikers
             AddReward(-m_Existential);
+        }
+
+        if (soundSensor != null && soundSensor.somethingHeard(out Vector3 soundPosition))
+        {
+            var direction = (soundPosition - transform.position).normalized;
+            agentRb.AddForce(direction * m_ForwardSpeed, ForceMode.VelocityChange);
         }
         MoveAgent(actionBuffers.DiscreteActions);
     }
@@ -203,6 +223,7 @@ public class AgentSoccer : Agent
         if (c.gameObject.CompareTag("ball"))
         {
             AddReward(.2f * m_BallTouch);
+            soundSensor?.hearSound(transform.position, 5.0f);
             var dir = c.contacts[0].point - transform.position;
             dir = dir.normalized;
             c.gameObject.GetComponent<Rigidbody>().AddForce(dir * force);
