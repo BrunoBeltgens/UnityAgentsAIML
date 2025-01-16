@@ -33,6 +33,11 @@ namespace ML_Agents.Examples.Soccer.Scripts
             return observationSpec;
         }
 
+        public void Awake()
+        {
+            observationSpec = ObservationSpec.Vector(9);
+        }
+
         public void hearSound(Vector3 position, float baseIntensity = 1.0f)
         {
             if (Time.time - timeSinceLastHeard < soundCooldown) return;
@@ -64,7 +69,7 @@ namespace ML_Agents.Examples.Soccer.Scripts
                 writer.Add(Vector3.zero);
             }
 
-            return 7;
+            return 9;
         }
 
         public byte[] GetCompressedObservation()

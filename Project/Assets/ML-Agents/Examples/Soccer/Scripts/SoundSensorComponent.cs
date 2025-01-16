@@ -1,10 +1,12 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.MLAgents.Sensors;
+
 namespace ML_Agents.Examples.Soccer.Scripts
 {
     [RequireComponent(typeof(SoundSensor))]
-    public class SoundSensorComponent : MonoBehaviour
+    public class SoundSensorComponent : SensorComponent
     {
         [Header("Sound Sensor Settings")]
         [Tooltip("Radius within which the sound can be heard")]
@@ -13,29 +15,15 @@ namespace ML_Agents.Examples.Soccer.Scripts
         public float soundDuration = 1.0f;
         private SoundSensor soundSensor;
 
-        private void Awake()
+        public override ISensor[] CreateSensors()
         {
             soundSensor = GetComponent<SoundSensor>();
             if (soundSensor == null)
             {
-                soundSensor = gameObject.AddComponent<SoundSensor>();
+                Debug.LogWarning("Sound Sensor component is missing");
             }
             soundSensor.hearingRadius = hearingRadius;
-        }
-
-        private void Start()
-        {
-            Debug.Log($"Sound sensor initialised with hearing radius {hearingRadius}");
-        }
-
-        public void HearSound(Vector3 position)
-        {
-            soundSensor.hearSound(position);
-        }
-
-        public void ResetSensor()
-        {
-            soundSensor.Reset();
+            return new ISensor[] { soundSensor };
         }
     }
 
