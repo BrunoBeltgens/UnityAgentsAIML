@@ -1,0 +1,57 @@
+{
+    "SoccerTwos": {
+        "checkpoints": [
+            {
+                "steps": 49270,
+                "file_path": "results/test_fixed_sensor_02/SoccerTwos/SoccerTwos-49270.onnx",
+                "reward": 0.0,
+                "creation_time": 1736929596.7611442,
+                "auxillary_file_paths": [
+                    "results/test_fixed_sensor_02/SoccerTwos/SoccerTwos-49270.pt"
+                ]
+            },
+            {
+                "steps": 99247,
+                "file_path": "results/test_fixed_sensor_02/SoccerTwos/SoccerTwos-99247.onnx",
+                "reward": 0.0,
+                "creation_time": 1736929808.4867442,
+                "auxillary_file_paths": [
+                    "results/test_fixed_sensor_02/SoccerTwos/SoccerTwos-99247.pt"
+                ]
+            },
+            {
+                "steps": 149128,
+                "file_path": "results/test_fixed_sensor_02/SoccerTwos/SoccerTwos-149128.onnx",
+                "reward": 0.0,
+                "creation_time": 1736930050.805629,
+                "auxillary_file_paths": [
+                    "results/test_fixed_sensor_02/SoccerTwos/SoccerTwos-149128.pt"
+                ]
+            },
+            {
+                "steps": 192654,
+                "file_path": "results/test_fixed_sensor_02/SoccerTwos/SoccerTwos-192654.onnx",
+                "reward": 0.0,
+                "creation_time": 1736930273.803204,
+                "auxillary_file_paths": [
+                    "results/test_fixed_sensor_02/SoccerTwos/SoccerTwos-192654.pt"
+                ]
+            }
+        ],
+        "elo": 801.9574409539284,
+        "final_checkpoint": {
+            "steps": 192654,
+            "file_path": "results/test_fixed_sensor_02/SoccerTwos.onnx",
+            "reward": 0.0,
+            "creation_time": 1736930273.803204,
+            "auxillary_file_paths": [
+                "results/test_fixed_sensor_02/SoccerTwos/SoccerTwos-192654.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.5.1"
+    }
+}
