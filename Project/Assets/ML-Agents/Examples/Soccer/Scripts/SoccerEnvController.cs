@@ -44,6 +44,8 @@ public class SoccerEnvController : MonoBehaviour
 
     private SimpleMultiAgentGroup m_BlueAgentGroup;
     private SimpleMultiAgentGroup m_PurpleAgentGroup;
+    private int goalBlueCount = 0;
+    private int goalPurpleCount = 0;
 
     private int m_ResetTimer;
 
@@ -102,16 +104,18 @@ public class SoccerEnvController : MonoBehaviour
         {
             m_BlueAgentGroup.AddGroupReward(1 - (float)m_ResetTimer / MaxEnvironmentSteps);
             m_PurpleAgentGroup.AddGroupReward(-1);
+            goalBlueCount++;
         }
         else
         {
             m_PurpleAgentGroup.AddGroupReward(1 - (float)m_ResetTimer / MaxEnvironmentSteps);
             m_BlueAgentGroup.AddGroupReward(-1);
+            goalPurpleCount++;
         }
         m_PurpleAgentGroup.EndGroupEpisode();
         m_BlueAgentGroup.EndGroupEpisode();
         ResetScene();
-
+        //Debug.Log($"Goals Scored Blue Team {goalBlueCount} : Purple Team {goalPurpleCount}");
     }
 
 
