@@ -35,7 +35,7 @@ public class AgentSoccer : Agent
     float m_BallTouch;  // From curriculum or environment parameters
     public Position position;
 
-    const float k_Power = 2000f;
+    const float k_Power = 200f;
     float m_Existential;
     float m_LateralSpeed;
     float m_ForwardSpeed;
