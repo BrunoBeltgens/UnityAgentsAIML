@@ -11,7 +11,7 @@ namespace MLAgents.Soccer
         private AgentSoccer agentSoccer;
         private SoccerEnvController envController;
         private float hearingRadius;
-        
+
         private const int ValuesPerSource = 3;
         private const int NumSources = 4;
         private const int ObservationSize = ValuesPerSource * NumSources;
@@ -22,7 +22,7 @@ namespace MLAgents.Soccer
             agentSoccer = agent;
             envController = controller;
             hearingRadius = radius;
-            Debug.Log($"[AudioSensor] Initialized: {name} for agent {agent.name} with radius {radius}");
+            //Debug.Log($"[AudioSensor] Initialized: {name} for agent {agent.name} with radius {radius}");
         }
 
         public string GetName() => sensorName;
@@ -36,7 +36,7 @@ namespace MLAgents.Soccer
         {
             if (envController == null || envController.ball == null)
             {
-                Debug.LogError($"[AudioSensor] {sensorName}: Environment controller or ball is null!");
+                //Debug.LogError($"[AudioSensor] {sensorName}: Environment controller or ball is null!");
                 writer.AddList(new float[ObservationSize]);
                 return ObservationSize;
             }
@@ -47,9 +47,9 @@ namespace MLAgents.Soccer
             observationLog.AppendLine($"\n[AudioSensor] {agentSoccer.name} Observations:");
 
             // Ball observations
-            AddSourceObservation(observations, ref index, 
+            AddSourceObservation(observations, ref index,
                 envController.ball.transform,
-                1.0f, "Ball", observationLog); 
+                1.0f, "Ball", observationLog);
 
             int teammateCount = 0;
             int opponentCount = 0;
@@ -58,10 +58,10 @@ namespace MLAgents.Soccer
             foreach (var playerInfo in envController.AgentsList)
             {
                 if (playerInfo.Agent == agentSoccer) continue;
-                
+
                 float sourceType = playerInfo.Agent.team == agentSoccer.team ? 2.0f : 3.0f;
                 string sourceTypeName = sourceType == 2.0f ? "Teammate" : "Opponent";
-                
+
                 if (sourceType == 2.0f) teammateCount++;
                 else opponentCount++;
 
@@ -72,7 +72,7 @@ namespace MLAgents.Soccer
                     observationLog);
             }
 
-            Debug.Log(observationLog.ToString());
+            //Debug.Log(observationLog.ToString());
             writer.AddList(observations);
             return ObservationSize;
         }
@@ -80,12 +80,12 @@ namespace MLAgents.Soccer
         private void AddSourceObservation(float[] observations, ref int index, Transform source, float sourceType, string sourceName, StringBuilder log)
         {
             float distance = Vector3.Distance(agentSoccer.transform.position, source.position);
-            
+
             if (distance > hearingRadius)
             {
                 // Zero value for observations outside range
-                observations[index++] = 1.0f;  
-                observations[index++] = 0.0f;  
+                observations[index++] = 1.0f;
+                observations[index++] = 0.0f;
                 observations[index++] = sourceType;
                 log.AppendLine($"  {sourceName}: dist={distance:F2} (OUT OF RANGE)");
                 return;
@@ -94,30 +94,34 @@ namespace MLAgents.Soccer
             float normalizedDistance = distance / hearingRadius;
             float intensity = 0f;
             // For ball, intensity is 1 if moving, 0 if not moving
-            if (sourceType == 1.0f) 
+            if (sourceType == 1.0f)
             {
                 var ballRb = envController.ballRb;
-                if(ballRb.velocity.magnitude > 0.1f){
+                if (ballRb.velocity.magnitude > 0.1f)
+                {
                     intensity = 1;
                 }
                 log.AppendLine($"  Ball: dist={distance:F2}, normDist={normalizedDistance:F2}, intensity={intensity:F2} (moving={intensity > 0})");
             }
-            else 
+            else
             {
-                if(agentSoccer.GetComponent<Rigidbody>().velocity.magnitude > 0.1f){
+                if (agentSoccer.GetComponent<Rigidbody>().velocity.magnitude > 0.1f)
+                {
                     intensity = 1;
-                    Debug.Log($"agent is moving with velocity {agentSoccer.GetComponent<Rigidbody>().velocity.magnitude}");
+                    //Debug.Log($"agent is moving with velocity {agentSoccer.GetComponent<Rigidbody>().velocity.magnitude}");
                 }
                 log.AppendLine($"  {sourceName}: dist={distance:F2}, normDist={normalizedDistance:F2}, intensity={intensity:F2}");
             }
 
-            if(intensity == 1){
-                Debug.Log($"[AudioSensor] {sourceName} is moving");
+            if (intensity == 1)
+            {
+                //Debug.Log($"[AudioSensor] {sourceName} is moving");
                 observations[index++] = normalizedDistance;
                 observations[index++] = intensity;
                 observations[index++] = sourceType;
             }
-            else{
+            else
+            {
                 observations[index++] = 1.0f;
                 observations[index++] = 0.0f;
                 observations[index++] = sourceType;

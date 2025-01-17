@@ -64,14 +64,14 @@ public class AgentSoccer : Agent
 
     public void Update()
     {
-        
-        
+
+
     }
 
     public override void Initialize()
     {
-    shouldPlaySound = false;
-    ball = transform.parent.Find("Soccer Ball")?.gameObject;
+        shouldPlaySound = false;
+        ball = transform.parent.Find("Soccer Ball")?.gameObject;
 
         // Only assign a new agentID if it hasn't been set (i.e., if it’s 0)
         if (agentID == 0)
@@ -79,15 +79,15 @@ public class AgentSoccer : Agent
             agentID = nextAgentID++;
         }
 
-    envController = GetComponentInParent<SoccerEnvController>();
-    if (envController != null)
-    {
-        m_Existential = 1f / envController.MaxEnvironmentSteps;
-    }
-    else
-    {
-        m_Existential = 1f / MaxStep;
-    }
+        envController = GetComponentInParent<SoccerEnvController>();
+        if (envController != null)
+        {
+            m_Existential = 1f / envController.MaxEnvironmentSteps;
+        }
+        else
+        {
+            m_Existential = 1f / MaxStep;
+        }
 
         m_BehaviorParameters = gameObject.GetComponent<BehaviorParameters>();
         if (m_BehaviorParameters.TeamId == (int)Team.Blue)
@@ -122,47 +122,47 @@ public class AgentSoccer : Agent
         agentRb.maxAngularVelocity = 500;
 
         m_ResetParams = Academy.Instance.EnvironmentParameters;
-        opponentGoalPosition = initialPos + new Vector3(rotSign * 25.0f, 0, 0); 
+        opponentGoalPosition = initialPos + new Vector3(rotSign * 25.0f, 0, 0);
     }
 
     private bool BallIsShot(string agentTag)
-{
-    if (ball == null) return false;
-    // Debug.DrawLine(transform.position, opponentGoalPosition, Color.red, 2.0f); // Draw a line to the opponent's goal position
-    // Debug.Log($"Opponent Goal Position: {opponentGoalPosition}"); // Log the position for debugging
-
-    // Check if the ball's velocity is above a threshold and is moving towards the opponent's goal.
-    Vector3 ballVelocity = ball.GetComponent<Rigidbody>().velocity;
-    Vector3 directionToGoal = opponentGoalPosition - ball.transform.position;
-    float dotProduct = Vector3.Dot(ballVelocity.normalized, directionToGoal.normalized);
-
-    if (agentTag == "blueAgent")
     {
-        SoccerEnvController.BlueTeamGoalAccuracySum += dotProduct; // Track goal accuracy for blue team
-        SoccerEnvController.BlueTeamGoalAttempts++; // Track number of shots for blue team
+        if (ball == null) return false;
+        // Debug.DrawLine(transform.position, opponentGoalPosition, Color.red, 2.0f); // Draw a line to the opponent's goal position
+        // Debug.Log($"Opponent Goal Position: {opponentGoalPosition}"); // Log the position for debugging
+
+        // Check if the ball's velocity is above a threshold and is moving towards the opponent's goal.
+        Vector3 ballVelocity = ball.GetComponent<Rigidbody>().velocity;
+        Vector3 directionToGoal = opponentGoalPosition - ball.transform.position;
+        float dotProduct = Vector3.Dot(ballVelocity.normalized, directionToGoal.normalized);
+
+        if (agentTag == "blueAgent")
+        {
+            SoccerEnvController.BlueTeamGoalAccuracySum += dotProduct; // Track goal accuracy for blue team
+            SoccerEnvController.BlueTeamGoalAttempts++; // Track number of shots for blue team
+        }
+        else if (agentTag == "purpleAgent")
+        {
+            SoccerEnvController.PurpleTeamGoalAccuracySum += dotProduct; // Track goal accuracy for purple team
+            SoccerEnvController.PurpleTeamGoalAttempts++; // Track number of shots for purple team
+        }
+        return ballVelocity.magnitude > 2.0f && dotProduct > 0.8f; // Ball is moving towards the opponent's goal significantly.
     }
-    else if (agentTag == "purpleAgent")
+
+    private bool BallIsBlocked()
     {
-        SoccerEnvController.PurpleTeamGoalAccuracySum += dotProduct; // Track goal accuracy for purple team
-        SoccerEnvController.PurpleTeamGoalAttempts++; // Track number of shots for purple team
+        if (ball == null) return false;
+
+        // Check if the ball's position is close to the agent, and its velocity is reduced.
+        Vector3 ballPosition = ball.transform.position;
+        Vector3 agentPosition = transform.position;
+
+        float distance = Vector3.Distance(ballPosition, agentPosition);
+
+        // Assume the ball is blocked if it's near the agent and its velocity is below a threshold.
+        Rigidbody ballRb = ball.GetComponent<Rigidbody>();
+        return distance < 1.5f && ballRb.velocity.magnitude < 1.0f;
     }
-    return ballVelocity.magnitude > 2.0f && dotProduct > 0.8f; // Ball is moving towards the opponent's goal significantly.
-}
-
-private bool BallIsBlocked()
-{
-    if (ball == null) return false;
-
-    // Check if the ball's position is close to the agent, and its velocity is reduced.
-    Vector3 ballPosition = ball.transform.position;
-    Vector3 agentPosition = transform.position;
-
-    float distance = Vector3.Distance(ballPosition, agentPosition);
-
-    // Assume the ball is blocked if it's near the agent and its velocity is below a threshold.
-    Rigidbody ballRb = ball.GetComponent<Rigidbody>();
-    return distance < 1.5f && ballRb.velocity.magnitude < 1.0f;
-}
 
     public void MoveAgent(ActionSegment<int> act)
     {
@@ -271,7 +271,7 @@ private bool BallIsBlocked()
     }
 
     void OnCollisionEnter(Collision c)
-    {        
+    {
         if (c.gameObject.CompareTag("ball") && (gameObject.CompareTag("blueAgent") || gameObject.CompareTag("purpleAgent")))
         {
             string agentTag = gameObject.tag;
@@ -302,12 +302,12 @@ private bool BallIsBlocked()
                     envController.lastAgentToTouchBall.GetComponent<AgentSoccer>().AddReward(-0.05f); // Penalty
                 }
                 // Reset possession timer
-                if(agentTag == "blueAgent")
-                {            
+                if (agentTag == "blueAgent")
+                {
                     SoccerEnvController.PurpleTeamTotalPossessionTime += envController.possessionTime;
                 }
-                else if(agentTag == "purpleAgent")
-                {                    
+                else if (agentTag == "purpleAgent")
+                {
                     SoccerEnvController.BlueTeamTotalPossessionTime += envController.possessionTime;
                 }
                 envController.possessionTime = 0f;
@@ -320,7 +320,7 @@ private bool BallIsBlocked()
 
             var dir = c.contacts[0].point - transform.position;
             dir = dir.normalized;
-            
+
             Rigidbody ballRb = c.gameObject.GetComponent<Rigidbody>();
             if (ballRb != null)
             {
