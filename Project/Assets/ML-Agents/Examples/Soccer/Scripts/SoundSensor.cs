@@ -48,7 +48,7 @@ namespace ML_Agents.Examples.Soccer.Scripts
             collectedSounds.Add(new SoundHeard { position = position, intensity = intensity });
             soundTimestamps.Add(Time.time);
             timeSinceLastHeard = Time.time;
-            Debug.Log($"Position = {position}, Intensity = {intensity}");
+            //Debug.Log($"Position = {position}, Intensity = {intensity}");
         }
 
         public int Write(ObservationWriter writer)
