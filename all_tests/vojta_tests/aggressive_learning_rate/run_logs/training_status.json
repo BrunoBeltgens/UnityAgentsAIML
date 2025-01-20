@@ -1,0 +1,66 @@
+{
+    "SoccerTwos": {
+        "checkpoints": [
+            {
+                "steps": 3499400,
+                "file_path": "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-3499400.onnx",
+                "reward": 0.0,
+                "creation_time": 1737225958.612098,
+                "auxillary_file_paths": [
+                    "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-3499400.pt"
+                ]
+            },
+            {
+                "steps": 3999108,
+                "file_path": "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-3999108.onnx",
+                "reward": 0.0,
+                "creation_time": 1737229739.397674,
+                "auxillary_file_paths": [
+                    "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-3999108.pt"
+                ]
+            },
+            {
+                "steps": 4499656,
+                "file_path": "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-4499656.onnx",
+                "reward": 0.0,
+                "creation_time": 1737233677.390149,
+                "auxillary_file_paths": [
+                    "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-4499656.pt"
+                ]
+            },
+            {
+                "steps": 4999656,
+                "file_path": "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-4999656.onnx",
+                "reward": 0.0,
+                "creation_time": 1737237614.2719731,
+                "auxillary_file_paths": [
+                    "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-4999656.pt"
+                ]
+            },
+            {
+                "steps": 5239726,
+                "file_path": "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-5239726.onnx",
+                "reward": 0.0,
+                "creation_time": 1737239450.201057,
+                "auxillary_file_paths": [
+                    "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-5239726.pt"
+                ]
+            }
+        ],
+        "elo": 1196.2084716981328,
+        "final_checkpoint": {
+            "steps": 5239726,
+            "file_path": "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos.onnx",
+            "reward": 0.0,
+            "creation_time": 1737239450.201057,
+            "auxillary_file_paths": [
+                "all_tests/vojta_tests/aggressive_learning_rate/SoccerTwos/SoccerTwos-5239726.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.5.1"
+    }
+}
